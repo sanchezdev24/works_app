@@ -14,12 +14,11 @@ Future<void> init() async {
 }
 
 void _registerCore() {
-  // Network
   sl.registerLazySingleton<ApiClient>(() => ApiClient());
 }
 
 void _registerDashboardFeature() {
-  // BLoC (factory = new instance per BlocProvider)
+  // BLoC
   sl.registerFactory<DashboardBloc>(
     () => DashboardBloc(getJobsUseCase: sl()),
   );
@@ -34,8 +33,8 @@ void _registerDashboardFeature() {
     () => JobsRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // Data Sources
+  // Data Sources — usar JobsRemoteDataSourceImpl para consumir la API real
   sl.registerLazySingleton<JobsRemoteDataSource>(
-    () => MockJobsRemoteDataSourceImpl(),
+    () => JobsRemoteDataSourceImpl(apiClient: sl()),
   );
 }

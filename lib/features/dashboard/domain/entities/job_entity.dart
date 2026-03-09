@@ -1,29 +1,29 @@
 import 'package:equatable/equatable.dart';
 
 class JobEntity extends Equatable {
-  final int id;
-  final String url;
+  final String id;
+  final String applyUrl;
   final String title;
   final String company;
   final String companyLogo;
-  final String category;
+  final String experienceLevel;
   final String jobType;
-  final String publicationDate;
-  final String candidateRequiredLocation;
+  final String publishedAt;
+  final String location;
   final String salary;
   final String description;
   final List<String> tags;
 
   const JobEntity({
     required this.id,
-    required this.url,
+    required this.applyUrl,
     required this.title,
     required this.company,
     required this.companyLogo,
-    required this.category,
+    required this.experienceLevel,
     required this.jobType,
-    required this.publicationDate,
-    required this.candidateRequiredLocation,
+    required this.publishedAt,
+    required this.location,
     required this.salary,
     required this.description,
     required this.tags,
@@ -32,14 +32,14 @@ class JobEntity extends Equatable {
   @override
   List<Object?> get props => [
         id,
-        url,
+        applyUrl,
         title,
         company,
         companyLogo,
-        category,
+        experienceLevel,
         jobType,
-        publicationDate,
-        candidateRequiredLocation,
+        publishedAt,
+        location,
         salary,
         description,
         tags,

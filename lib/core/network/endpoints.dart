@@ -1,8 +1,8 @@
 class Endpoints {
   Endpoints._();
 
-  static const String baseUrl = 'https://remotive.com/api';
+  static const String baseUrl = 'https://works-backend-sckq.onrender.com/api/v1';
 
   // Jobs
-  static const String jobs = '/remote-jobs';
+  static const String jobs = '/jobs';
 }

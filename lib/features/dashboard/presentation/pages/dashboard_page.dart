@@ -21,8 +21,8 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<DashboardBloc>()
-        ..add(const DashboardLoadJobsEvent()),
+      create: (_) =>
+          sl<DashboardBloc>()..add(const DashboardLoadJobsEvent()),
       child: const _DashboardView(),
     );
   }
@@ -39,15 +39,12 @@ class _DashboardViewState extends State<_DashboardView> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
 
-  static const _categories = [
-    'All',
-    'Software Dev',
-    'DevOps / Sysadmin',
-    'Design',
-    'Marketing',
-    'Finance',
-    'Product',
-    'Data Science',
+  // jobType values que acepta la API
+  static const _jobTypeFilters = [
+    {'label': 'All', 'value': null},
+    {'label': 'Full Time', 'value': 'full_time'},
+    {'label': 'Part Time', 'value': 'part_time'},
+    {'label': 'Contract', 'value': 'contract'},
   ];
 
   @override
@@ -87,10 +84,9 @@ class _DashboardViewState extends State<_DashboardView> {
         body: BlocConsumer<DashboardBloc, DashboardState>(
           listener: (context, state) {
             if (state.isFailure && state.jobs.isNotEmpty) {
-              // Show snackbar for load-more errors
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.errorMessage ?? 'Error'),
+                  content: Text(state.errorMessage ?? 'Error al cargar más'),
                   backgroundColor: AppColors.error,
                 ),
               );
@@ -103,7 +99,8 @@ class _DashboardViewState extends State<_DashboardView> {
 
             if (state.isFailure && state.jobs.isEmpty) {
               return AppErrorWidget(
-                message: state.errorMessage ?? 'No se pudieron cargar los trabajos.',
+                message: state.errorMessage ??
+                    'No se pudieron cargar los trabajos.',
                 onRetry: () => context
                     .read<DashboardBloc>()
                     .add(const DashboardRefreshJobsEvent()),
@@ -119,7 +116,7 @@ class _DashboardViewState extends State<_DashboardView> {
                 onAction: () {
                   _searchController.clear();
                   context.read<DashboardBloc>().add(
-                        const DashboardFilterByCategoryEvent(category: null),
+                        const DashboardFilterByJobTypeEvent(jobType: null),
                       );
                 },
               );
@@ -186,7 +183,7 @@ class _DashboardViewState extends State<_DashboardView> {
                 },
               ),
               AppSpacing.gapSM,
-              _buildCategoryChips(context),
+              _buildJobTypeChips(context),
             ],
           ),
         ),
@@ -223,7 +220,8 @@ class _DashboardViewState extends State<_DashboardView> {
           ),
           AppSpacing.gapXS,
           BlocBuilder<DashboardBloc, DashboardState>(
-            buildWhen: (prev, curr) => prev.jobs.length != curr.jobs.length,
+            buildWhen: (prev, curr) =>
+                prev.jobs.length != curr.jobs.length,
             builder: (context, state) {
               if (state.jobs.isEmpty) return const SizedBox.shrink();
               return AppText(
@@ -238,50 +236,45 @@ class _DashboardViewState extends State<_DashboardView> {
     );
   }
 
-  Widget _buildCategoryChips(BuildContext context) {
+  Widget _buildJobTypeChips(BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
       buildWhen: (prev, curr) =>
-          prev.selectedCategory != curr.selectedCategory,
+          prev.selectedJobType != curr.selectedJobType,
       builder: (context, state) {
         return SizedBox(
           height: 36,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: _categories.length,
+            itemCount: _jobTypeFilters.length,
             separatorBuilder: (_, __) => AppSpacing.hGapXS,
             itemBuilder: (context, index) {
-              final category = _categories[index];
-              final isSelected = category == 'All'
-                  ? state.selectedCategory == null
-                  : state.selectedCategory == category;
+              final filter = _jobTypeFilters[index];
+              final label = filter['label'] as String;
+              final value = filter['value'] as String?;
+              final isSelected = value == state.selectedJobType;
 
               return FilterChip(
                 label: Text(
-                  category,
+                  label,
                   style: AppTextStyles.labelSmall.copyWith(
                     color: isSelected
                         ? AppColors.primary
                         : AppColors.textSecondary,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.w400,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
                 selected: isSelected,
                 onSelected: (_) {
                   context.read<DashboardBloc>().add(
-                        DashboardFilterByCategoryEvent(
-                          category: category == 'All' ? null : category,
-                        ),
+                        DashboardFilterByJobTypeEvent(jobType: value),
                       );
                 },
                 selectedColor: AppColors.surfaceVariant,
                 checkmarkColor: AppColors.primary,
                 backgroundColor: AppColors.surface,
                 side: BorderSide(
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.grey300,
+                  color: isSelected ? AppColors.primary : AppColors.grey300,
                 ),
                 showCheckmark: false,
                 padding: const EdgeInsets.symmetric(horizontal: 4),

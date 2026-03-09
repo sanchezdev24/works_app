@@ -16,7 +16,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DashboardRefreshJobsEvent>(_onRefreshJobs);
     on<DashboardLoadMoreJobsEvent>(_onLoadMoreJobs);
     on<DashboardSearchChangedEvent>(_onSearchChanged);
-    on<DashboardFilterByCategoryEvent>(_onFilterByCategory);
+    on<DashboardFilterByJobTypeEvent>(_onFilterByJobType);
   }
 
   Future<void> _onLoadJobs(
@@ -25,24 +25,26 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) async {
     emit(state.copyWith(status: DashboardStatus.loading));
 
-    final result = await getJobsUseCase.call(
-      GetJobsParams(
-        category: event.category ?? state.selectedCategory,
-        search: event.search ?? state.searchQuery,
-        limit: _pageLimit,
-        offset: 0,
-      ),
-    ).run();
+    final result = await getJobsUseCase
+        .call(
+          GetJobsParams(
+            jobType: event.jobType ?? state.selectedJobType,
+            search: event.search ?? state.searchQuery,
+            limit: _pageLimit,
+            page: 1,
+          ),
+        )
+        .run();
 
     result.match(
       (failure) => emit(state.copyWith(
         status: DashboardStatus.failure,
-        errorMessage: failure.toString(),
+        errorMessage: failure.message ?? failure.toString(),
       )),
       (jobs) => emit(state.copyWith(
         status: DashboardStatus.success,
         jobs: jobs,
-        currentOffset: jobs.length,
+        currentPage: 1,
         hasReachedMax: jobs.length < _pageLimit,
       )),
     );
@@ -53,7 +55,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     add(DashboardLoadJobsEvent(
-      category: state.selectedCategory,
+      jobType: state.selectedJobType,
       search: state.searchQuery,
     ));
   }
@@ -66,26 +68,30 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
     emit(state.copyWith(status: DashboardStatus.loadingMore));
 
-    final result = await getJobsUseCase.call(
-      GetJobsParams(
-        category: state.selectedCategory,
-        search: state.searchQuery,
-        limit: _pageLimit,
-        offset: state.currentOffset,
-      ),
-    ).run();
+    final nextPage = state.currentPage + 1;
+
+    final result = await getJobsUseCase
+        .call(
+          GetJobsParams(
+            jobType: state.selectedJobType,
+            search: state.searchQuery,
+            limit: _pageLimit,
+            page: nextPage,
+          ),
+        )
+        .run();
 
     result.match(
       (failure) => emit(state.copyWith(
-        status: DashboardStatus.success, // revert to success, show snackbar
-        errorMessage: failure.toString(),
+        status: DashboardStatus.success,
+        errorMessage: failure.message ?? failure.toString(),
       )),
       (newJobs) {
         final allJobs = [...state.jobs, ...newJobs];
         emit(state.copyWith(
           status: DashboardStatus.success,
           jobs: allJobs,
-          currentOffset: allJobs.length,
+          currentPage: nextPage,
           hasReachedMax: newJobs.length < _pageLimit,
         ));
       },
@@ -100,11 +106,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     add(DashboardLoadJobsEvent(search: event.query));
   }
 
-  Future<void> _onFilterByCategory(
-    DashboardFilterByCategoryEvent event,
+  Future<void> _onFilterByJobType(
+    DashboardFilterByJobTypeEvent event,
     Emitter<DashboardState> emit,
   ) async {
-    emit(state.copyWith(selectedCategory: event.category));
-    add(DashboardLoadJobsEvent(category: event.category));
+    emit(state.copyWith(selectedJobType: event.jobType));
+    add(DashboardLoadJobsEvent(jobType: event.jobType));
   }
 }

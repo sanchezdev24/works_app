@@ -8,13 +8,18 @@ abstract class DashboardEvent extends Equatable {
 }
 
 class DashboardLoadJobsEvent extends DashboardEvent {
-  final String? category;
+  final String? jobType;
+  final String? experienceLevel;
   final String? search;
 
-  const DashboardLoadJobsEvent({this.category, this.search});
+  const DashboardLoadJobsEvent({
+    this.jobType,
+    this.experienceLevel,
+    this.search,
+  });
 
   @override
-  List<Object?> get props => [category, search];
+  List<Object?> get props => [jobType, experienceLevel, search];
 }
 
 class DashboardRefreshJobsEvent extends DashboardEvent {
@@ -34,11 +39,11 @@ class DashboardSearchChangedEvent extends DashboardEvent {
   List<Object?> get props => [query];
 }
 
-class DashboardFilterByCategoryEvent extends DashboardEvent {
-  final String? category;
+class DashboardFilterByJobTypeEvent extends DashboardEvent {
+  final String? jobType;
 
-  const DashboardFilterByCategoryEvent({this.category});
+  const DashboardFilterByJobTypeEvent({this.jobType});
 
   @override
-  List<Object?> get props => [category];
+  List<Object?> get props => [jobType];
 }

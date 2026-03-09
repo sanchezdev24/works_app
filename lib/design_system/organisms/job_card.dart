@@ -19,9 +19,11 @@ class JobCard extends StatelessWidget {
 
   AppBadgeVariant _jobTypeVariant(String jobType) {
     switch (jobType.toLowerCase()) {
+      case 'full_time':
       case 'full time':
       case 'full-time':
         return AppBadgeVariant.success;
+      case 'part_time':
       case 'part time':
       case 'part-time':
         return AppBadgeVariant.warning;
@@ -29,6 +31,19 @@ class JobCard extends StatelessWidget {
         return AppBadgeVariant.info;
       default:
         return AppBadgeVariant.neutral;
+    }
+  }
+
+  String _formatJobType(String jobType) {
+    switch (jobType.toLowerCase()) {
+      case 'full_time':
+        return 'Full Time';
+      case 'part_time':
+        return 'Part Time';
+      case 'contract':
+        return 'Contract';
+      default:
+        return jobType;
     }
   }
 
@@ -53,12 +68,12 @@ class JobCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: company logo + name + date
+            // Header: company logo + name
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppAvatar(
-                  imageUrl: job.companyLogo,
+                  imageUrl: job.companyLogo.isNotEmpty ? job.companyLogo : null,
                   name: job.company,
                   size: AppAvatarSize.md,
                   backgroundColor: AppColors.grey100,
@@ -84,7 +99,7 @@ class JobCard extends StatelessWidget {
                   ),
                 ),
                 AppSpacing.hGapSM,
-                Icon(
+                const Icon(
                   Icons.bookmark_border_rounded,
                   color: AppColors.grey400,
                   size: 20,
@@ -94,7 +109,7 @@ class JobCard extends StatelessWidget {
 
             AppSpacing.gapMD,
 
-            // Location + Remote
+            // Location + salary
             Row(
               children: [
                 const Icon(
@@ -105,9 +120,7 @@ class JobCard extends StatelessWidget {
                 AppSpacing.hGapXS,
                 Expanded(
                   child: AppText(
-                    job.candidateRequiredLocation.isEmpty
-                        ? 'Worldwide'
-                        : job.candidateRequiredLocation,
+                    job.location.isEmpty ? 'Worldwide' : job.location,
                     variant: AppTextVariant.bodySmall,
                     color: AppColors.textSecondary,
                     maxLines: 1,
@@ -121,10 +134,14 @@ class JobCard extends StatelessWidget {
                     size: 14,
                     color: AppColors.textSecondary,
                   ),
-                  AppText(
-                    job.salary,
-                    variant: AppTextVariant.bodySmall,
-                    color: AppColors.textSecondary,
+                  Flexible(
+                    child: AppText(
+                      job.salary,
+                      variant: AppTextVariant.bodySmall,
+                      color: AppColors.textSecondary,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ],
@@ -138,9 +155,14 @@ class JobCard extends StatelessWidget {
               runSpacing: AppSpacing.xs,
               children: [
                 AppBadge(
-                  label: job.jobType,
+                  label: _formatJobType(job.jobType),
                   variant: _jobTypeVariant(job.jobType),
                 ),
+                if (job.experienceLevel.isNotEmpty)
+                  AppBadge(
+                    label: job.experienceLevel,
+                    variant: AppBadgeVariant.primary,
+                  ),
                 if (job.tags.isNotEmpty)
                   ...job.tags
                       .take(2)

@@ -7,19 +7,19 @@ class DashboardState extends Equatable {
   final DashboardStatus status;
   final List<JobEntity> jobs;
   final String? errorMessage;
-  final String? selectedCategory;
+  final String? selectedJobType;
   final String searchQuery;
   final bool hasReachedMax;
-  final int currentOffset;
+  final int currentPage;
 
   const DashboardState({
     this.status = DashboardStatus.initial,
     this.jobs = const [],
     this.errorMessage,
-    this.selectedCategory,
+    this.selectedJobType,
     this.searchQuery = '',
     this.hasReachedMax = false,
-    this.currentOffset = 0,
+    this.currentPage = 1,
   });
 
   bool get isInitial => status == DashboardStatus.initial;
@@ -32,30 +32,19 @@ class DashboardState extends Equatable {
     DashboardStatus? status,
     List<JobEntity>? jobs,
     String? errorMessage,
-    String? selectedCategory,
+    String? selectedJobType,
     String? searchQuery,
     bool? hasReachedMax,
-    int? currentOffset,
+    int? currentPage,
   }) {
     return DashboardState(
       status: status ?? this.status,
       jobs: jobs ?? this.jobs,
       errorMessage: errorMessage ?? this.errorMessage,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
+      selectedJobType: selectedJobType ?? this.selectedJobType,
       searchQuery: searchQuery ?? this.searchQuery,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      currentOffset: currentOffset ?? this.currentOffset,
-    );
-  }
-
-  DashboardState clearError() {
-    return DashboardState(
-      status: status,
-      jobs: jobs,
-      selectedCategory: selectedCategory,
-      searchQuery: searchQuery,
-      hasReachedMax: hasReachedMax,
-      currentOffset: currentOffset,
+      currentPage: currentPage ?? this.currentPage,
     );
   }
 
@@ -64,9 +53,9 @@ class DashboardState extends Equatable {
         status,
         jobs,
         errorMessage,
-        selectedCategory,
+        selectedJobType,
         searchQuery,
         hasReachedMax,
-        currentOffset,
+        currentPage,
       ];
 }

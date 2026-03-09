@@ -13,16 +13,20 @@ class JobsRepositoryImpl implements JobsRepository {
   const JobsRepositoryImpl({required this.remoteDataSource});
 
   @override
-  ResultFuture<List<JobEntity>> getJobs(GetJobsParams params) => TaskEither.tryCatch(() async {
-    return remoteDataSource.getJobs(category: params.category, search: params.search, limit: params.limit, offset: params.offset);
-  }, 
-  (error, StackTrace) {
-    if (error is DioException) {
-    return UnexpectedFailure('UnexpectedFailure error: $error');
-    } else {
-      return UnexpectedFailure('UnexpectedFailure error: $error');
-    }
-  });
-
-  
+  ResultFuture<List<JobEntity>> getJobs(GetJobsParams params) =>
+      TaskEither.tryCatch(
+        () async => remoteDataSource.getJobs(
+          search: params.search,
+          jobType: params.jobType,
+          experienceLevel: params.experienceLevel,
+          page: params.page,
+          limit: params.limit,
+        ),
+        (error, _) {
+          if (error is DioException) {
+            return UnexpectedFailure('network_error', message: error.message);
+          }
+          return UnexpectedFailure('unexpected_error', message: error.toString());
+        },
+      );
 }
